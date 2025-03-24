@@ -41,7 +41,7 @@ function findHref(element) {
     
     if (!secondElement) return null;
 
-    const firstChildOfSecondElement = secondElement ? secondElement.children[0] : null;
+    const firstChildOfSecondElement = secondElement ? secondElement.children[1] : null;
 
     if (firstChildOfSecondElement && firstChildOfSecondElement.href) {
         return element;

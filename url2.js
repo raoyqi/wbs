@@ -8,7 +8,7 @@ function findHref(element) {
     const secondElement = element.children[1]; // 第二个子元素的索引是 1
 
     if (!secondElement) return null;
-    const firstChildOfSecondElement = secondElement ? secondElement.children[0] : null;
+    const firstChildOfSecondElement = secondElement ? secondElement.children[1] : null;
 
     if (firstChildOfSecondElement && firstChildOfSecondElement.href) {
         return firstChildOfSecondElement.href; // Return the href value instead of the element
