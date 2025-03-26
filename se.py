@@ -6,7 +6,6 @@ import os
 
 # ✅ 设置 Chrome 配置
 chrome_options = uc.ChromeOptions()
-print(chrome_options )
 chrome_options.headless = False  # 设为 True 可无头运行
 chrome_options.add_argument('--disable-gpu')
 chrome_options.add_argument('--no-sandbox')
@@ -14,11 +13,10 @@ chrome_options.add_argument('--no-sandbox')
 # ✅ 指定 Chromium 浏览器路径
 chrome_path = r'C:\Users\r\Desktop\ungoogled-chromium_131.0.6778.85-1.1_windows_x64\ungoogled-chromium_131.0.6778.85-1.1_windows_x64\chrome.exe'
 chrome_options.binary_location = chrome_path
-print(111 )
+
 
 # ✅ 启动 undetected_chromedriver
 driver = uc.Chrome(driver_executable_path="chromedriver.exe",options=chrome_options, browser_executable_path=chrome_path)
-print(222)
 
 # ✅ 打开 Web of Science
 url = "https://webofscience.clarivate.cn/wos/alldb/basic-search"
@@ -43,20 +41,27 @@ time.sleep(5)
 # ✅ 获取所有符合条件的链接
 links = driver.find_elements(By.XPATH, "//a[@href]")
 
+import re
 
-# 过滤掉带有 'style' 属性的元素
+# driver = ...
 
-# ✅ 创建下载目录
-download_folder = "downloads"
-os.makedirs(download_folder, exist_ok=True)
+# 获取所有符合条件的链接
+links = driver.find_elements(By.XPATH, "//a[@href]")
 
-# ✅ 保存 outerHTML 到本地
-for index, link in enumerate(links):
-    outer_html = link.get_attribute("outerHTML")
-    if outer_html:
-        filename = os.path.join(download_folder, f"outerHTML_{index+1}.html")
-        with open(filename, "w", encoding="utf-8") as file:
-            file.write(outer_html)
-        print(f"✅ 已保存: {filename}")
+# 打开文件以写入链接
+with open("links.txt", "w", encoding="utf-8") as file:
+    # 提取并保存所有 href
+    for link in links:
+        outer_html = link.get_attribute("outerHTML")  # 获取完整的 HTML 代码
+        if outer_html:
+            # 使用正则表达式提取所有 href
+            hrefs = re.findall(r'href=["\'](https?://[^"\']+)["\']', outer_html)
+            for href in hrefs:
+                file.write(href + "\n")  # 写入到文件，并换行
+                print(href)  # 如果你还想在控制台看到输出，可以保留这行
+
+print("所有链接已保存到 links.txt 文件中。")
+
+
 
 time.sleep(5000)  # 让浏览器保持打开
