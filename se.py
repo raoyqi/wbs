@@ -1,101 +1,62 @@
-from selenium import webdriver
+import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.keys import Keys
 import time
-from selenium.webdriver.common.keys import Keys  # 导入 Keys 类以模拟回车键
-# 设置 Chrome 配置（如果需要）
-# Chrome 的选项配置
-chrome_options = Options()
-chrome_options.headless = False  # 设置为 False 以便看到浏览器界面
-chromedriver_path = 'chromedriver.exe'  # 这里设置 chromedriver 路径
+import os
 
+# ✅ 设置 Chrome 配置
+chrome_options = uc.ChromeOptions()
+print(chrome_options )
+chrome_options.headless = False  # 设为 True 可无头运行
 chrome_options.add_argument('--disable-gpu')
 chrome_options.add_argument('--no-sandbox')
 
-
-chrome_path = r'C:\Users\r\Desktop\ungoogled-chromium_131.0.6778.85-1.1_windows_x64\ungoogled-chromium_131.0.6778.85-1.1_windows_x64\chrome.exe'  # 根据实际路径设置
+# ✅ 指定 Chromium 浏览器路径
+chrome_path = r'C:\Users\r\Desktop\ungoogled-chromium_131.0.6778.85-1.1_windows_x64\ungoogled-chromium_131.0.6778.85-1.1_windows_x64\chrome.exe'
 chrome_options.binary_location = chrome_path
+print(111 )
 
-service = Service(executable_path=chromedriver_path, log_path='chromedriver.log')
-driver = webdriver.Chrome(service=service, options=chrome_options)
+# ✅ 启动 undetected_chromedriver
+driver = uc.Chrome(driver_executable_path="chromedriver.exe",options=chrome_options, browser_executable_path=chrome_path)
+print(222)
 
-
-# 打开 Web of Science 链接
+# ✅ 打开 Web of Science
 url = "https://webofscience.clarivate.cn/wos/alldb/basic-search"
 driver.get(url)
-time.sleep(5)  # 可以根据需要增加等待时间
+time.sleep(5)
 
 try:
-    # 使用显示等待 (WebDriverWait) 来等待按钮元素加载并点击
+    # ✅ 查找并点击同意按钮
     consent_button = driver.find_element(By.ID, "onetrust-accept-btn-handler")
     consent_button.click()
-    print("同意隐私政策按钮已点击。")
+    print("✅ 同意隐私政策按钮已点击。")
 except Exception as e:
-    print("未找到同意按钮，跳过。")
+    print("⚠️ 未找到同意按钮，跳过。")
 
-# 等待页面加载完成
-
-# 查找并输入搜索框
+# ✅ 查找并输入搜索框
 search_box = driver.find_element(By.ID, "search-option")
-search_box.send_keys("Convolutional Neural Networks")  # 输入搜索内容
+search_box.send_keys("Convolutional Neural Networks")
+search_box.send_keys(Keys.RETURN)  # 模拟按下回车键
 
-# 模拟按下回车键
-search_box.send_keys(Keys.RETURN)
-# Define the JavaScript code to be executed
 time.sleep(5)
-js_code = """
-const links = Array.from(document.querySelectorAll('.ng-star-inserted'));
-const filteredLinks = links.filter(link => !link.hasAttribute('style'));
 
-// 递归查找元素中是否包含 href 属性
-function findHref(element) {
-    // 如果元素为空，返回 null
-    if (!element) return null;
-    console.log()
-    const secondElement = element.children[1]; // 第二个子元素的索引是 1
-
-    if (!secondElement) return null;
-    console.log(secondElement)
-    const firstChildOfSecondElement = secondElement ? secondElement.children[0] : null;
-
-    if (firstChildOfSecondElement && firstChildOfSecondElement.href) {
-        return firstChildOfSecondElement.href; // Return the href value instead of the element
-    }
-
-    return null;
-}
-
-let foundCount = 0;
-
-for (let link of filteredLinks) {
-    const href = findHref(link);
-
-    if (href) {
-        foundCount++;  // Increment the found count
-
-        // 如果找到第二个符合条件的链接，则跳出循环并在新窗口打开链接
-        if (foundCount === 2) {
-            console.log(href); // 打印找到的 href 属性
-            window.open(href, '_blank'); // Open the href in a new window/tab
-            break; // Stop the loop after opening the second link
-        }
-    } else {
-        console.log("第二个子元素或其子元素没有 href 属性");
-    }
-}
+# ✅ 获取所有符合条件的链接
+links = driver.find_elements(By.XPATH, "//a[@href]")
 
 
-"""
+# 过滤掉带有 'style' 属性的元素
 
-# Execute the JavaScript code
-driver.execute_script(js_code)
-# 等待搜索结果加载
-time.sleep(5000)
-#onetrust-button-group
+# ✅ 创建下载目录
+download_folder = "downloads"
+os.makedirs(download_folder, exist_ok=True)
 
+# ✅ 保存 outerHTML 到本地
+for index, link in enumerate(links):
+    outer_html = link.get_attribute("outerHTML")
+    if outer_html:
+        filename = os.path.join(download_folder, f"outerHTML_{index+1}.html")
+        with open(filename, "w", encoding="utf-8") as file:
+            file.write(outer_html)
+        print(f"✅ 已保存: {filename}")
 
-
-# 关闭浏览器
-# driver.quit()
-
+time.sleep(5000)  # 让浏览器保持打开
