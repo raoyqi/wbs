@@ -76,6 +76,7 @@ print(f'{single_file_path} {current_url} {save_path}')
 
 current_urls.append(current_url)
 
+time.sleep(100)
 
 driver.quit()
 
